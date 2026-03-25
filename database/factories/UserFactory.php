@@ -30,7 +30,38 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'avatar' => 'https://api.dicebear.com/7.x/avataaars/svg?seed=' . fake()->userName(),
+            'bio' => fake()->sentence(),
+            'gender' => fake()->randomElement(['male', 'female']),
+            'date_of_birth' => fake()->date('Y-m-d', '-18 years'),
+            'location' => fake()->city() . ', ' . fake()->country(),
+            'native_language' => fake()->randomElement(['English', 'Arabic', 'Spanish', 'French']),
+            'cefr_level' => fake()->randomElement(['A1.1', 'A1.2', 'A2', 'B1.1', 'B1.2', 'B2', 'C1', 'C2']),
+            'role' => 'student',
+            'is_vip' => fake()->boolean(20),
+            'is_online' => fake()->boolean(30),
+            'last_seen_at' => fake()->dateTimeBetween('-1 week', 'now'),
         ];
+    }
+
+    /**
+     * Indicate that the user is an instructor.
+     */
+    public function instructor(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'instructor',
+        ]);
+    }
+
+    /**
+     * Indicate that the user is an admin.
+     */
+    public function admin(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'role' => 'admin',
+        ]);
     }
 
     /**
