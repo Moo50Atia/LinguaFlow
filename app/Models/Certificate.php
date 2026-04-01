@@ -10,8 +10,14 @@ class Certificate extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'course_id', 'title', 'certificate_number',
-        'level', 'category', 'file_path', 'issued_at'
+        'user_id',
+        'course_id',
+        'title',
+        'certificate_number',
+        'level',
+        'category',
+        'file_path',
+        'issued_at'
     ];
 
     protected $casts = [

@@ -9,14 +9,18 @@ class Chat extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['type', 'name', 'avatar'];
+    protected $fillable = [
+        'type',
+        'name',
+        'avatar'
+    ];
 
     public function members()
     {
         // A chat can have many users as participants.
         return $this->belongsToMany(User::class, 'chat_members')
-                    ->withPivot('role', 'unread_count')
-                    ->withTimestamps();
+            ->withPivot('role', 'unread_count')
+            ->withTimestamps();
     }
 
     public function messages()

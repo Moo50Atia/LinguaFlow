@@ -10,8 +10,12 @@ class Enrollment extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'course_id', 'current_lesson', 'completed_lessons',
-        'progress', 'status'
+        'user_id',
+        'course_id',
+        'current_lesson',
+        'completed_lessons',
+        'progress',
+        'status'
     ];
 
     protected $casts = [

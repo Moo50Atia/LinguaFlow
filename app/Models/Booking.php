@@ -10,9 +10,16 @@ class Booking extends Model
     use HasFactory;
 
     protected $fillable = [
-        'user_id', 'instructor_id', 'instructor_slot_id',
-        'booking_type', 'course_style', 'date', 'time',
-        'price', 'status', 'notes'
+        'user_id',
+        'instructor_id',
+        'instructor_slot_id',
+        'booking_type',
+        'course_style',
+        'date',
+        'time',
+        'price',
+        'status',
+        'notes'
     ];
 
     protected $casts = [
