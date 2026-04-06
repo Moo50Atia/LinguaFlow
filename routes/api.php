@@ -55,6 +55,12 @@ Route::middleware('auth:sanctum')->group(function () {
     
     // Notifications - Sprint 7
     
+    // Booking - Sprint 4
+    Route::post('bookings', [\App\Http\Controllers\Api\BookingController::class, 'store']);
+    Route::get('bookings', [\App\Http\Controllers\Api\BookingController::class, 'index']);
+    Route::patch('bookings/{booking}/cancel', [\App\Http\Controllers\Api\BookingController::class, 'cancel']);
+    Route::patch('bookings/{booking}/confirm', [\App\Http\Controllers\Api\BookingController::class, 'confirm']);
+    
     // Shared - Sprint 0
     Route::post('translate', [\App\Http\Controllers\Api\TranslationController::class, 'translate']);
 
