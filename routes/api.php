@@ -33,6 +33,15 @@ Route::prefix('certificates/verify')->group(function () {
 // └─────────────────────────────────────────┘
 Route::middleware('auth:sanctum')->group(function () {
 
+    // Community (moments, connect) - Sprint 5
+    Route::get('moments', [\App\Http\Controllers\Api\MomentController::class, 'index']);
+    Route::post('moments', [\App\Http\Controllers\Api\MomentController::class, 'store']);
+    Route::delete('moments/{moment}', [\App\Http\Controllers\Api\MomentController::class, 'destroy']);
+    Route::post('moments/{moment}/like', [\App\Http\Controllers\Api\MomentController::class, 'like']);
+    Route::post('moments/{moment}/corrections', [\App\Http\Controllers\Api\MomentController::class, 'correct']);
+    Route::get('users/discover', [\App\Http\Controllers\Api\CommunityController::class, 'discover']);
+    Route::post('friend-requests', [\App\Http\Controllers\Api\CommunityController::class, 'sendFriendRequest']);
+
     // Auth (logout, onboarding) - Sprint 1
     Route::post('auth/onboarding', [\App\Http\Controllers\Api\AuthController::class, 'onboarding']);
     Route::post('auth/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout']);
@@ -60,6 +69,11 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('bookings', [\App\Http\Controllers\Api\BookingController::class, 'index']);
     Route::patch('bookings/{booking}/cancel', [\App\Http\Controllers\Api\BookingController::class, 'cancel']);
     Route::patch('bookings/{booking}/confirm', [\App\Http\Controllers\Api\BookingController::class, 'confirm']);
+    
+    // Chat - Sprint 6
+    Route::get('chat', [\App\Http\Controllers\Api\ChatController::class, 'index']);
+    Route::get('chat/{user}', [\App\Http\Controllers\Api\ChatController::class, 'show']);
+    Route::post('chat', [\App\Http\Controllers\Api\ChatController::class, 'store']);
     
     // Shared - Sprint 0
     Route::post('translate', [\App\Http\Controllers\Api\TranslationController::class, 'translate']);
