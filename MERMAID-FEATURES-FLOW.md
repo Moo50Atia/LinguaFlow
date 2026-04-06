@@ -949,28 +949,28 @@ sequenceDiagram
 ### CRUD Lessons within a Course
 
 ```mermaid
-sequenceDiagram
-    autonumber
-    actor User
-    participant React as Frontend (React)
-    participant Controller as Laravel Controller
-    participant Request as FormRequest (Validation)
-    participant Service as Service Layer (Logic)
-    participant Repo as Repository (Data)
-    participant DB as Database
+    sequenceDiagram
+        autonumber
+        actor User
+        participant React as Frontend (React)
+        participant Controller as Laravel Controller
+        participant Request as FormRequest (Validation)
+        participant Service as Service Layer (Logic)
+        participant Repo as Repository (Data)
+        participant DB as Database
 
-    User->>React: Trigger action
-    React->>Controller: POST /api/instructor/courses/{courseId}/lessons
-    Controller->>Request: Validate Request via StoreLessonRequest
-    Request-->>Controller: Validation Passed
-    Controller->>Service: Call corresponding Service Method
-    Service->>Repo: Request DB operation
-    Repo->>DB: Execute Query
-    DB-->>Repo: Return Result
-    Repo-->>Service: Return Model/Data
-    Service-->>Controller: Return processed data
-    Controller-->>React: API JSON Response
-    React-->>User: Update UI
+        User->>React: Trigger action
+        React->>Controller: POST /api/instructor/courses/{courseId}/lessons
+        Controller->>Request: Validate Request via StoreLessonRequest
+        Request-->>Controller: Validation Passed
+        Controller->>Service: Call corresponding Service Method
+        Service->>Repo: Request DB operation
+        Repo->>DB: Execute Query
+        DB-->>Repo: Return Result
+        Repo-->>Service: Return Model/Data
+        Service-->>Controller: Return processed data
+        Controller-->>React: API JSON Response
+        React-->>User: Update UI
 ```
 
 ### CRUD Lesson Materials
