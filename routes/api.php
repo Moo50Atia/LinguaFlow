@@ -14,6 +14,8 @@ use Illuminate\Support\Facades\Route;
 // └─────────────────────────────────────────┘
 Route::prefix('public')->group(function () {
     // Sprint 9: Landing stats, public courses
+    Route::get('stats', [\App\Http\Controllers\Api\PublicCatalogController::class, 'stats']);
+    Route::get('featured-courses', [\App\Http\Controllers\Api\PublicCatalogController::class, 'featuredCourses']);
 });
 
 Route::prefix('auth')->group(function () {
@@ -81,7 +83,8 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('bookings/{booking}/cancel', [\App\Http\Controllers\Api\BookingController::class, 'cancel']);
     Route::patch('bookings/{booking}/confirm', [\App\Http\Controllers\Api\BookingController::class, 'confirm']);
     
-    // Chat - Sprint 6
+    // Support - Sprint 9
+    Route::post('support/report', [\App\Http\Controllers\Api\SupportController::class, 'report']);
     Route::get('chat', [\App\Http\Controllers\Api\ChatController::class, 'index']);
     Route::get('chat/{user}', [\App\Http\Controllers\Api\ChatController::class, 'show']);
     Route::post('chat', [\App\Http\Controllers\Api\ChatController::class, 'store']);
