@@ -47,6 +47,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('auth/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout']);
     
     // Dashboard - Sprint 7
+    Route::get('dashboard', [\App\Http\Controllers\Api\DashboardController::class, 'index']);
     
     // Learning (courses, lessons, instructors) - Sprint 2 & 3
     Route::get('instructors', [\App\Http\Controllers\Api\InstructorController::class, 'index']);
@@ -63,6 +64,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('reviews', [\App\Http\Controllers\Api\ReviewController::class, 'store']);
     
     // Notifications - Sprint 7
+    Route::get('notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
+    Route::patch('notifications/{notification}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
+    Route::patch('notifications/read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
     
     // Booking - Sprint 4
     Route::post('bookings', [\App\Http\Controllers\Api\BookingController::class, 'store']);
@@ -93,5 +97,6 @@ Route::middleware('auth:sanctum')->group(function () {
         // Sprint 4 & Sprint 7 stubs
         Route::apiResource('slots', \App\Http\Controllers\Api\SlotController::class)->except(['show', 'update']);
         // Dashboard stats goes here
+        Route::get('dashboard', [\App\Http\Controllers\Api\InstructorDashboardController::class, 'index']);
     });
 });
