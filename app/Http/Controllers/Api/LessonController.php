@@ -7,6 +7,9 @@ use App\Models\Lesson;
 use App\Http\Requests\Learning\StoreLessonRequest;
 use App\Http\Resources\LessonResource;
 use App\Services\LessonService;
+use App\Actions\Learning\CompleteLessonAction;
+use App\Http\Requests\Learning\CompleteLessonRequest;
+use App\Queries\Learning\LessonCatalogQuery;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Illuminate\Http\Request;
@@ -18,6 +21,32 @@ class LessonController extends BaseController
     public function __construct(
         protected LessonService $lessonService
     ) {}
+
+    public function index(Request $request, LessonCatalogQuery $query): JsonResponse
+    {
+        return $this->sendSuccess([
+            'lessons' => LessonResource::collection($query->execute($request->all()))->response()->getData(true)
+        ]);
+    }
+
+    public function show(Lesson $lesson): JsonResponse
+    {
+        $this->authorize('view', $lesson);
+        $lesson->load(['materials', 'quizzes']);
+
+        return $this->sendSuccess([
+            'lesson' => new LessonResource($lesson)
+        ]);
+    }
+
+    public function complete(CompleteLessonRequest $request, Lesson $lesson, CompleteLessonAction $action): JsonResponse
+    {
+        $this->authorize('view', $lesson);
+
+        $completion = $action->execute($request->user(), $lesson, $request->validated('score'));
+
+        return $this->sendSuccess(['completion' => $completion], 'Lesson completed successfully.');
+    }
 
     public function store(StoreLessonRequest $request, Course $course): JsonResponse
     {

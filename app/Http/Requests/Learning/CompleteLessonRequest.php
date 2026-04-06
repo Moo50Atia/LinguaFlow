@@ -4,17 +4,17 @@ namespace App\Http\Requests\Learning;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreEnrollmentRequest extends FormRequest
+class CompleteLessonRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        return true; // Lesson view policy handles access
     }
 
     public function rules(): array
     {
         return [
-            'course_id' => 'required|exists:courses,id',
+            'score' => 'nullable|integer|min:0|max:100',
         ];
     }
 }

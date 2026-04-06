@@ -44,6 +44,15 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('instructors/{instructor}', [\App\Http\Controllers\Api\InstructorController::class, 'show']);
     Route::get('instructors/{instructor}/slots', [\App\Http\Controllers\Api\InstructorController::class, 'slots']);
     
+    // Sprint 3: Students Learning Endpoints
+    Route::get('courses/{course}', [\App\Http\Controllers\Api\CourseController::class, 'show']);
+    Route::get('lessons', [\App\Http\Controllers\Api\LessonController::class, 'index']);
+    Route::get('lessons/{lesson}', [\App\Http\Controllers\Api\LessonController::class, 'show']);
+    Route::post('enrollments', [\App\Http\Controllers\Api\EnrollmentController::class, 'store']);
+    Route::post('lessons/{lesson}/complete', [\App\Http\Controllers\Api\LessonController::class, 'complete']);
+    Route::post('quizzes/submit', [\App\Http\Controllers\Api\QuizController::class, 'submit']);
+    Route::post('reviews', [\App\Http\Controllers\Api\ReviewController::class, 'store']);
+    
     // Notifications - Sprint 7
     
     // Shared - Sprint 0

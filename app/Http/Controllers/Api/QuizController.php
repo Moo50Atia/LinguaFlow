@@ -3,8 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\QuizQuestion;
+use App\Actions\Learning\EvaluateQuizAction;
 use App\Http\Requests\Learning\StoreQuizQuestionRequest;
+use App\Http\Requests\Learning\SubmitQuizRequest;
 use App\Http\Resources\QuizQuestionResource;
+use App\Http\Resources\QuizResultResource;
 use App\Services\QuizService;
 use Illuminate\Http\JsonResponse;
 
@@ -51,5 +54,14 @@ class QuizController extends BaseController
         $this->quizService->delete($quiz);
 
         return $this->sendDeleted();
+    }
+
+    public function submit(SubmitQuizRequest $request, EvaluateQuizAction $action): JsonResponse
+    {
+        $result = $action->execute($request->user(), $request->validated());
+
+        return $this->sendSuccess([
+            'result' => new QuizResultResource($result)
+        ], 'Quiz evaluated successfully.');
     }
 }
