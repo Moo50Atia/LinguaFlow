@@ -26,6 +26,7 @@ Route::prefix('auth')->group(function () {
 
 Route::prefix('certificates/verify')->group(function () {
     // Sprint 8: Public certificate verification
+    Route::get('{number}', [\App\Http\Controllers\Api\CertificateController::class, 'verify']);
 });
 
 // ┌─────────────────────────────────────────┐
@@ -67,6 +68,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('notifications', [\App\Http\Controllers\Api\NotificationController::class, 'index']);
     Route::patch('notifications/{notification}/read', [\App\Http\Controllers\Api\NotificationController::class, 'markAsRead']);
     Route::patch('notifications/read-all', [\App\Http\Controllers\Api\NotificationController::class, 'markAllAsRead']);
+    
+    // Profile, Certificates & Subscriptions - Sprint 8
+    Route::get('profile', [\App\Http\Controllers\Api\ProfileController::class, 'show']);
+    Route::put('profile', [\App\Http\Controllers\Api\ProfileController::class, 'update']);
+    Route::get('certificates', [\App\Http\Controllers\Api\CertificateController::class, 'index']);
+    Route::post('subscribe', [\App\Http\Controllers\Api\SubscriptionController::class, 'checkout']);
     
     // Booking - Sprint 4
     Route::post('bookings', [\App\Http\Controllers\Api\BookingController::class, 'store']);
