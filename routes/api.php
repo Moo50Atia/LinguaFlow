@@ -40,14 +40,9 @@ Route::middleware('auth:sanctum')->group(function () {
     // Dashboard - Sprint 7
     
     // Learning (courses, lessons, instructors) - Sprint 2 & 3
-    
-    // Booking - Sprint 4
-    
-    // Community (moments, connect) - Sprint 5
-    
-    // Chat - Sprint 6
-    
-    // Profile - Sprint 8
+    Route::get('instructors', [\App\Http\Controllers\Api\InstructorController::class, 'index']);
+    Route::get('instructors/{instructor}', [\App\Http\Controllers\Api\InstructorController::class, 'show']);
+    Route::get('instructors/{instructor}/slots', [\App\Http\Controllers\Api\InstructorController::class, 'slots']);
     
     // Notifications - Sprint 7
     
@@ -59,7 +54,15 @@ Route::middleware('auth:sanctum')->group(function () {
     // └─────────────────────────────────────┘
     Route::middleware('role:instructor,admin')->prefix('instructor')->group(function () {
         // Sprint 2: Course/Lesson/Quiz/Material CRUD
-        // Sprint 4: Slots management
-        // Sprint 7: Dashboard stats
+        Route::apiResource('courses', \App\Http\Controllers\Api\InstructorCourseController::class);
+        Route::post('courses/{course}/lessons', [\App\Http\Controllers\Api\LessonController::class, 'store']);
+        Route::put('lessons/{lesson}', [\App\Http\Controllers\Api\LessonController::class, 'update']);
+        Route::delete('lessons/{lesson}', [\App\Http\Controllers\Api\LessonController::class, 'destroy']);
+        Route::post('lessons/{lesson}/materials', [\App\Http\Controllers\Api\MaterialController::class, 'store']);
+        Route::apiResource('quizzes', \App\Http\Controllers\Api\QuizController::class)->except('show');
+        
+        // Sprint 4 & Sprint 7 stubs
+        Route::apiResource('slots', \App\Http\Controllers\Api\SlotController::class)->except(['show', 'update']);
+        // Dashboard stats goes here
     });
 });
