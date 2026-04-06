@@ -18,6 +18,10 @@ Route::prefix('public')->group(function () {
 
 Route::prefix('auth')->group(function () {
     // Sprint 1: Register, Login, Google OAuth
+    Route::post('register', [\App\Http\Controllers\Api\AuthController::class, 'register']);
+    Route::post('login', [\App\Http\Controllers\Api\AuthController::class, 'login']);
+    Route::get('google/redirect', [\App\Http\Controllers\Api\AuthController::class, 'googleRedirect']);
+    Route::get('google/callback', [\App\Http\Controllers\Api\AuthController::class, 'googleCallback']);
 });
 
 Route::prefix('certificates/verify')->group(function () {
@@ -30,6 +34,8 @@ Route::prefix('certificates/verify')->group(function () {
 Route::middleware('auth:sanctum')->group(function () {
 
     // Auth (logout, onboarding) - Sprint 1
+    Route::post('auth/onboarding', [\App\Http\Controllers\Api\AuthController::class, 'onboarding']);
+    Route::post('auth/logout', [\App\Http\Controllers\Api\AuthController::class, 'logout']);
     
     // Dashboard - Sprint 7
     
