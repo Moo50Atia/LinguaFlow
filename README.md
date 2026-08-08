@@ -1,58 +1,183 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# LinguaFlow — Language Learning & Peer Translation API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+> **Clean Architecture • Domain Complexity • High-Concurrency Backend API**
 
-## About Laravel
+LinguaFlow is a specialized **Language-Learning Ecosystem & Peer Translation Backend API** built with Laravel 13, PHP 8.3, and MySQL. It bridges self-paced course progression, synchronous instructor session booking with pessimistic concurrency control, peer-to-peer grammar corrections, and dynamic language partner matching across 26 interconnected domain entities.
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+---
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+## ⚡ 30-Second Recruiter Summary
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+LinguaFlow was designed to showcase **production-grade backend architecture** for complex multi-sided platforms. Rather than relying on simple CRUD controllers, LinguaFlow enforces strict separation of concerns through:
 
-## Learning Laravel
+- **Single Action Classes**: Isolated write-side business operations encapsulated in atomic database transactions (`DB::transaction`).
+- **Command/Query Responsibility Separation (CQRS-lite)**: Dedicated Query Objects for heavy data aggregation, keeping read paths separate from domain mutation logic.
+- **Interface-Driven Repository Pattern**: 26 domain repositories backed by explicit PHP contracts and bound in a central `RepositoryServiceProvider` for testability and storage abstraction.
+- **Pessimistic Concurrency Management**: Row-level locking (`lockForUpdate()`) to eliminate double-booking race conditions during instructor slot reservations.
+- **Fine-Grained Policy Authorization**: Decoupled access control via Laravel Policies and Sanctum API authentication.
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+---
 
-In addition, [Laracasts](https://laracasts.com) contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## 🎯 Business Problem & Core Capabilities
 
-You can also watch bite-sized lessons with real-world projects on [Laravel Learn](https://laravel.com/learn), where you will be guided through building a Laravel application from scratch while learning PHP fundamentals.
+Multi-sided learning ecosystems require managing conflicting domain constraints: real-time scheduling concurrency, stateful progress tracking, multi-role security (Students, Instructors, Admins), and social community loops. LinguaFlow solves these challenges via four primary modules:
 
-## Agentic Development
+1. **Self-Paced Learning Engine**: Course cataloging, lesson progression tracking, interactive quiz evaluations, and automated certificate generation upon 100% completion.
+2. **Instructor Scheduling & Booking**: Private and group session booking with dynamic price calculations (group discounts, course bundle multipliers) and slot availability locking.
+3. **Peer Community & Corrections**: "Moments" feed where learners post text snippets and peers submit line-by-line grammar corrections and feedback.
+4. **Partner Matching & Messaging**: Cross-lingual exchange matching algorithm connecting students based on complementary native/learning languages and shared interests.
 
-Laravel's predictable structure and conventions make it ideal for AI coding agents like Claude Code, Cursor, and GitHub Copilot. Install [Laravel Boost](https://laravel.com/docs/ai) to supercharge your AI workflow:
+---
 
-```bash
-composer require laravel/boost --dev
+## 🏗️ Architecture Overview
 
-php artisan boost:install
+LinguaFlow follows a multi-layered API architecture that isolates HTTP controllers from business rules, data persistence, and read-side aggregations.
+
+```mermaid
+flowchart TD
+    Client[Client / Mobile / Web API Client]
+    
+    subgraph HTTP Layer
+        Auth[Laravel Sanctum Middleware]
+        Policy[Laravel Policy Authorization]
+        Controller[API Controller Layer]
+    end
+
+    subgraph Business Logic Layer
+        Actions[Single Action Classes\nWrite Operations / State Changes]
+        Services[Domain Services\nCross-Cutting Orchestration]
+        Queries[Query Objects\nRead-Optimized Aggregations]
+    end
+
+    subgraph Persistence Layer
+        RepoContracts[Repository Interfaces]
+        RepoImpl[Eloquent Repositories]
+        DB[(MySQL Database\n26 Relational Entities)]
+    end
+
+    Client -->|Bearer Token HTTP Request| Auth
+    Auth --> Policy
+    Policy --> Controller
+    
+    Controller -->|Mutations| Actions
+    Controller -->|Orchestration| Services
+    Controller -->|Dashboard Data| Queries
+    
+    Actions -->|Transactions & Locking| RepoContracts
+    Services --> RepoContracts
+    Queries -->|Optimized Queries| DB
+    
+    RepoContracts -->|Dependency Injection| RepoImpl
+    RepoImpl --> DB
 ```
 
-Boost provides your agent 15+ tools and skills that help agents build Laravel applications while following best practices.
+---
 
-## Contributing
+## 🔑 Key Engineering Workflows & Design Decisions
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+### 1. Pessimistic Concurrency Locking (Booking Sessions)
+- **Challenge**: Preventing concurrent double-booking when multiple students attempt to reserve the exact same instructor slot simultaneously.
+- **Implementation**: `BookInstructorSessionAction` wraps slot validation and booking creation inside an atomic `DB::transaction` and uses Eloquent's `lockForUpdate()` on `InstructorSlot`.
+- **Engineering Signal**: Prevents race conditions at the database level rather than relying on application-level checks.
 
-## Code of Conduct
+### 2. Event-Driven Progression & Auto-Certificates
+- **Challenge**: Accurately calculating student course progress, maintaining current lesson pointers, and issuing completion awards without duplicating logic.
+- **Implementation**: `CompleteLessonAction` atomically calculates completed lesson ratios, advances the student's `current_lesson_id` to the next ordered lesson, updates enrollment state, and auto-generates a cryptographically unique `Certificate` upon reaching 100% completion.
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+### 3. Cross-Language Matching Algorithm
+- **Challenge**: Recommending relevant language partners out of large student pools based on complementary learning goals.
+- **Implementation**: `DiscoverLanguagePartnersAction` filters candidates using a dual-way language bridge (User A native language matches User B learning language, or vice versa) and applies a dynamic scoring matrix based on shared interests (+10% match per shared interest, capped at 99%).
 
-## Security Vulnerabilities
+### 4. Read-Side Query Objects (CQRS-lite)
+- **Challenge**: Complex analytics dashboards (Instructor earnings, active enrollment heatmaps, pending session requests) bloated controllers and mixed query logic with business actions.
+- **Implementation**: Standalone Query Objects (`StudentDashboardQuery`, `InstructorDashboardQuery`) construct optimized SQL reads directly returning formatted dashboard structures.
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+## 📊 Domain Model & Data Complexity
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+The backend models **26 interconnected domain entities** with enforced foreign key integrity and indexes:
+
+| Domain Area | Models | Key Responsibilities |
+| :--- | :--- | :--- |
+| **Identity & Access** | `User`, `UserLanguage`, `UserInterest` | Roles (`student`, `instructor`, `admin`), CEFR levels, native/learning languages. |
+| **Instruction & Booking** | `Instructor`, `InstructorSlot`, `Booking` | Slot scheduling, hourly pricing, session status (`pending`, `confirmed`, `cancelled`). |
+| **Learning & Progression** | `Course`, `Lesson`, `LessonCompletion`, `Enrollment`, `Certificate` | Ordered lesson paths, completion tracking, percentage progress, certificate numbers. |
+| **Assessment & Content** | `QuizQuestion`, `QuizResult`, `LessonMaterial`, `Podcast` | Quiz scoring logic, downloadable course assets. |
+| **Community & Peer Exchange** | `Moment`, `MomentCorrection`, `MomentComment`, `MomentLike` | Social post creation, peer grammar corrections, likes, comments. |
+| **Messaging & Support** | `Chat`, `ChatMember`, `Message`, `Notification`, `Subscription`, `Review` | Direct messaging, internal notifications, tier subscriptions, instructor reviews. |
+
+---
+
+## 🔐 Authentication, Authorization & Security
+
+- **Token Authentication**: Authenticated endpoints utilize **Laravel Sanctum** bearer tokens issued via `AuthService`.
+- **Role Middleware**: Administrative and instructor routes are protected using custom role middleware (`role:instructor,admin`).
+- **Policy Enforcement**: Granular action authorization is delegated to dedicated Policy classes (`BookingPolicy`, `CoursePolicy`, `EnrollmentPolicy`, `LessonPolicy`, `MessagePolicy`, `MomentPolicy`).
+
+---
+
+## 🛠️ Technology Stack
+
+| Category | Technologies |
+| :--- | :--- |
+| **Backend Framework** | PHP 8.3+, Laravel 13.x |
+| **API & Authentication** | RESTful JSON API, Laravel Sanctum |
+| **Architecture Patterns** | Service Layer, Repository Pattern with Interfaces, Single Action Classes, Query Objects, Policies |
+| **Database & Persistence** | MySQL, Eloquent ORM, Foreign Key Constraints, InnoDB Row Locking |
+| **Testing** | PHPUnit / Pest Testing Suite |
+
+---
+
+## 🚀 Setup & Local Installation
+
+### Prerequisites
+- PHP >= 8.3
+- Composer
+- MySQL >= 8.0
+
+### Step-by-Step Setup
+
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/Moo50Atia/LinguaFlow.git
+   cd LinguaFlow
+   ```
+
+2. **Install PHP Dependencies**
+   ```bash
+   composer install
+   ```
+
+3. **Configure Environment**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+   *Configure your MySQL database credentials in `.env` (`DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD`).*
+
+4. **Run Migrations & Database Seeders**
+   ```bash
+   php artisan migrate --seed
+   ```
+
+5. **Start Local API Server**
+   ```bash
+   php artisan serve
+   ```
+   The API will be available at `http://localhost:8000/api`.
+
+---
+
+## 🧪 Testing
+
+Execute backend automated tests using PHPUnit:
+```bash
+php artisan test
+```
+
+---
+
+## 📄 License
+
+This project is open-sourced software licensed under the [MIT License](LICENSE).
